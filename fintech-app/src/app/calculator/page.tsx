@@ -1,3 +1,18 @@
+/**
+ * Financial Calculator Page
+ * 
+ * Provides various financial calculation tools:
+ * - Savings calculator (compound interest)
+ * - Loan calculator (monthly payments)
+ * - Tax calculator
+ * - Investment calculator
+ * 
+ * Features:
+ * - Real-time calculations
+ * - Input validation
+ * - Detailed results display
+ */
+
 'use client';
 
 import { useState } from 'react';

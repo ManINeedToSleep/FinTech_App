@@ -4,6 +4,22 @@ import { getUserFromToken } from '../../../lib/auth';
 
 const prisma = new PrismaClient();
 
+/**
+ * Transactions API Routes
+ * 
+ * Handles all transaction-related operations:
+ * GET: Fetches user's transaction history
+ * 
+ * Security:
+ * - Requires valid JWT token
+ * - Validates user authentication
+ * - Only returns transactions for authenticated user
+ * 
+ * Response format:
+ * - Success: Array of transaction objects
+ * - Error: { error: string } with appropriate status code
+ */
+
 export async function GET(request: Request) {
   try {
     const user = await getUserFromToken(request);

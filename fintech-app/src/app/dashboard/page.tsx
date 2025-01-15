@@ -1,3 +1,18 @@
+/**
+ * Dashboard Page Component
+ * 
+ * Main interface for users to:
+ * - View their current balance
+ * - Make deposits, withdrawals, and expenses
+ * - View recent transactions
+ * - Access financial tools
+ * 
+ * Uses:
+ * - TransactionModal for handling money operations
+ * - Fetches user data and transactions on load
+ * - Protected route (requires authentication)
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';

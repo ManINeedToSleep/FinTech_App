@@ -1,3 +1,17 @@
+/**
+ * Analytics Page
+ * 
+ * Visualizes user's financial data:
+ * - Transaction distribution (Pie Chart)
+ * - Monthly trends (Bar Chart)
+ * - Summary statistics
+ * 
+ * Uses:
+ * - Recharts for data visualization
+ * - Fetches transaction history
+ * - Protected route (requires authentication)
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

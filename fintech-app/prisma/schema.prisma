@@ -4,6 +4,20 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+/**
+ * Database Schema
+ * 
+ * Core models:
+ * User - Stores user account information and balance
+ * Transaction - Records all financial operations
+ * 
+ * Relationships:
+ * - One User has many Transactions
+ * - Each Transaction belongs to one User
+ * 
+ * Note: Run 'npx prisma generate' after modifying this file
+ */
+
 generator client {
   provider = "prisma-client-js"
 }

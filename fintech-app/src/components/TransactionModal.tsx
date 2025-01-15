@@ -7,6 +7,20 @@ interface TransactionModalProps {
   onSubmit: (amount: number, description: string) => Promise<void>;
 }
 
+/**
+ * Transaction Modal Component
+ * 
+ * Reusable modal for handling financial transactions:
+ * - Supports deposits, withdrawals, and expenses
+ * - Handles form submission and validation
+ * - Provides different styling based on transaction type
+ * 
+ * Props:
+ * @param isOpen - Controls modal visibility
+ * @param onClose - Function to close modal
+ * @param type - Transaction type ('deposit' | 'withdraw' | 'expense')
+ * @param onSubmit - Handler for form submission
+ */
 export default function TransactionModal({ isOpen, onClose, type, onSubmit }: TransactionModalProps) {
   if (!isOpen) return null;
 
