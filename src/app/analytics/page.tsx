@@ -31,6 +31,18 @@ interface Transaction {
   createdAt: string;
 }
 
+interface MonthlyData {
+  deposits: number;
+  withdrawals: number;
+  expenses: number;
+}
+
+interface Totals {
+  deposits: number;
+  withdrawals: number;
+  expenses: number;
+}
+
 const COLORS = ['#22c55e', '#3b82f6', '#ef4444'];
 
 export default function Analytics() {
@@ -68,7 +80,7 @@ export default function Analytics() {
   }, [router]);
 
   // Calculate totals by type
-  const totals = transactions.reduce((acc, transaction) => {
+  const totals: Totals = transactions.reduce((acc: Totals, transaction) => {
     const amount = Math.abs(transaction.amount);
     if (transaction.type === 'deposit') {
       acc.deposits += amount;
@@ -87,7 +99,7 @@ export default function Analytics() {
   ];
 
   // Monthly analysis
-  const monthlyData = transactions.reduce((acc: any, transaction) => {
+  const monthlyData = transactions.reduce((acc: Record<string, MonthlyData>, transaction) => {
     const date = new Date(transaction.createdAt);
     const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
     
@@ -107,7 +119,7 @@ export default function Analytics() {
     return acc;
   }, {});
 
-  const barData = Object.entries(monthlyData).map(([month, data]: [string, any]) => ({
+  const barData = Object.entries(monthlyData).map(([month, data]: [string, MonthlyData]) => ({
     month,
     ...data
   }));
