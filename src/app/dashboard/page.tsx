@@ -21,10 +21,7 @@ import TransactionModal from '@/components/TransactionModal';
 import Link from 'next/link';
 import { User, Transaction, Account } from '@/types/schema';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faChartLine, faShieldHalved, faBolt, faCoins, faChartPie,
-  faWallet, faCreditCard, faBell
-} from '@fortawesome/free-solid-svg-icons';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
 import CosmicBackground from '@/components/background/CosmicBackground';
 import FloatingIcons from '@/components/background/FloatingIcons';
 
@@ -344,22 +341,22 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex space-x-8 items-center">
-              <span className="text-xl font-semibold text-aurora-green">Nordic Finance</span>
+              <span className="text-xl font-semibold text-aurora-green">Fintech Financial Bank</span>
               <div className="flex space-x-4">
                 <Link 
                   href="/dashboard" 
-                  className="text-frost-blue hover:text-aurora-green transition-colors px-3 py-2 rounded-md hover:bg-white/5"
+                  className="text-aurora-green bg-white/5 transition-colors px-3 py-2 rounded-md"
                 >
                   Home
                 </Link>
                 <Link 
-                  href="/calculator" 
+                  href="/dashboard/calculator" 
                   className="text-frost-blue hover:text-aurora-green transition-colors px-3 py-2 rounded-md hover:bg-white/5"
                 >
                   Calculator
                 </Link>
                 <Link 
-                  href="/analytics" 
+                  href="/dashboard/analytics" 
                   className="text-frost-blue hover:text-aurora-green transition-colors px-3 py-2 rounded-md hover:bg-white/5"
                 >
                   Analytics

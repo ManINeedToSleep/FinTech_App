@@ -1,30 +1,60 @@
-# FinTech App
+# Fintech Financial Bank
 
-A modern financial management application built with Next.js, TypeScript, and Prisma, deployed on Vercel with Neon PostgreSQL. Features include transaction management, financial calculators, and analytics.
+A modern financial management application with Nordic-inspired design, built with Next.js 14, TypeScript, and Prisma. Features a cosmic aurora theme, real-time financial tracking, and comprehensive financial tools.
 
-## Features
+## ✨ Features
 
-- 🔒 Secure user authentication
-- 💰 Transaction management (deposits, withdrawals, expenses)
-- 📊 Financial analytics and visualizations
-- 🧮 Financial calculators
-- 📱 Responsive design
-- 🎨 Modern UI with Tailwind CSS
+### Core Features
+- 🔐 Secure JWT authentication
+- 💳 Transaction management (deposits, withdrawals, transfers)
+- 📊 Interactive financial analytics with Recharts
+- 🧮 Comprehensive financial calculators
+- 🌌 Nordic-inspired cosmic design system
 
-## Prerequisites
+### Financial Tools
+- 💰 Savings calculator
+- 🏦 Loan calculator
+- 📈 Investment planner
+- 💵 Tax calculator
+- 🏠 Mortgage calculator
+- 🎯 Retirement planner
 
-Before you begin, ensure you have installed:
-- Node.js (v18 or higher)
-- npm or yarn
-- Neon account (for PostgreSQL database)
-- Vercel account (for deployment)
+### Design System
+- 🌠 Aurora borealis animations
+- ⭐ Twinkling star effects
+- 🎨 Nordic color palette
+- 🌊 Glass-morphism UI elements
+- 📱 Fully responsive design
 
-## Setup
+## 🎨 Theme Colors
+```css
+:root {
+  --aurora-green: #7CFCD0;
+  --nordic-blue: #1E3D59;
+  --frost-blue: #E2E8F0;
+  --northern-pink: #FF61A6;
+  --snow-white: #F7F9FC;
+}
+```
+
+## 🛠 Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Database**: Neon PostgreSQL
+- **ORM**: Prisma
+- **Styling**: Tailwind CSS
+- **Authentication**: JWT + bcrypt
+- **Charts**: Recharts
+- **Animations**: CSS + React
+- **Icons**: FontAwesome
+- **Deployment**: Vercel
+
+## 📦 Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/fintech-app.git
-cd fintech-app
+git clone https://github.com/yourusername/fintech-bank.git
+cd fintech-bank
 ```
 
 2. Install dependencies:
@@ -32,46 +62,30 @@ cd fintech-app
 npm install
 ```
 
-3. Set up your environment variables:
-Create a `.env` file:
+3. Set up environment variables:
 ```env
 # Database (Neon)
-DATABASE_URL="postgres://user:password@endpoint/database"
-DIRECT_URL="postgres://user:password@endpoint/database"
+DATABASE_URL="postgresql://user:password@endpoint/database"
+DIRECT_URL="postgresql://user:password@endpoint/database"
 
 # Authentication
 JWT_SECRET="your-secret-key"
-JWT_EXPIRES_IN="24h"
-
-# Vercel
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
+JWT_EXPIRES_IN="7d"
 ```
 
-4. Setup database:
+4. Initialize database:
 ```bash
 npx prisma generate
 npx prisma db push
+npx prisma db seed
 ```
 
-## Development
-
-Run the development server:
+5. Run development server:
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Deployment
-
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
-
-## Database Schema
-
-The application uses the following Prisma schema:
+## 📊 Database Schema
 
 ```prisma
 model User {
@@ -79,78 +93,86 @@ model User {
   email        String        @unique
   username     String
   passwordHash String
-  balance      Float         @default(0)
+  firstName    String?
+  lastName     String?
+  accounts     Account[]
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
 
+model Account {
+  id          Int           @id @default(autoincrement())
+  accountType AccountType
+  accountName String
+  balance     Float         @default(0)
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
 model Transaction {
   id          Int      @id @default(autoincrement())
-  type        String   // 'deposit' | 'withdrawal' | 'expense'
+  type        TransactionType
   amount      Float
   description String
+  accountId   Int
+  account     Account  @relation(fields: [accountId], references: [id])
   userId      Int
   user        User     @relation(fields: [userId], references: [id])
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
   createdAt   DateTime @default(now())
+}
+
+model Category {
+  id           Int           @id @default(autoincrement())
+  name         String
+  type         TransactionType
+  icon         String
+  transactions Transaction[]
+
+  @@unique([name, type])
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
 }
 ```
 
-## API Routes
+## 🔒 API Routes
 
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `GET /api/user` - Get user details
-- `GET /api/transactions` - Get user transactions
-- `POST /api/transactions/deposit` - Create deposit
-- `POST /api/transactions/withdraw` - Create withdrawal
-- `POST /api/transactions/expense` - Create expense
+### Authentication
+- `POST /api/auth/register` - Create new account
+- `POST /api/auth/login` - User login
+- `GET /api/user` - Get user profile
 
-## Project Structure
+### Transactions
+- `GET /api/transactions` - List transactions
+- `POST /api/transactions/deposit` - Make deposit
+- `POST /api/transactions/withdraw` - Make withdrawal
+- `POST /api/transactions/transfer` - Make transfer
+- `POST /api/transactions/expense` - Record expense
 
-```
-fintech-app/
-├── src/
-│   ├── app/
-│   │   ├── api/           # API routes
-│   │   ├── auth/          # Authentication pages
-│   │   ├── dashboard/     # Dashboard page
-│   │   ├── calculator/    # Financial calculators
-│   │   └── analytics/     # Analytics page
-│   ├── components/        # Reusable components
-│   ├── lib/              # Utility functions
-│   └── styles/           # Global styles
-├── prisma/
-│   └── schema.prisma     # Database schema
-├── public/              # Static files
-└── package.json
-```
-
-## Technologies Used
-
-- [Next.js](https://nextjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Prisma](https://www.prisma.io/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Recharts](https://recharts.org/)
-- [JWT](https://jwt.io/)
-- [bcrypt](https://github.com/kelektiv/node.bcrypt.js)
-
-## Contributing
+## 🌟 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
+## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Next.js team for the amazing framework
-- Prisma team for the excellent ORM
-- Tailwind CSS team for the utility-first CSS framework
+This project is licensed under the MIT License.
 ``` 

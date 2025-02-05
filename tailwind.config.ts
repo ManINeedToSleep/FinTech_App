@@ -41,7 +41,24 @@ const config: Config = {
       animation: {
         'float-up': 'floatUp 0.8s ease-out forwards',
         'glow': 'glowPulse 2s infinite',
-        'aurora': 'auroraFlow 15s ease-in-out infinite',
+        'aurora': 'aurora 15s ease-in-out infinite',
+        'twinkle': 'twinkle 4s ease-in-out infinite',
+        'aurora-delayed': 'aurora 20s ease-in-out infinite',
+        'aurora-delayed-2': 'aurora 25s ease-in-out infinite',
+      },
+      keyframes: {
+        twinkle: {
+          '0%, 100%': { opacity: '0' },
+          '50%': { opacity: '1' },
+        },
+        aurora: {
+          '0%, 100%': {
+            transform: 'translateY(-50%) translateX(-25%) rotate(-5deg)',
+          },
+          '50%': {
+            transform: 'translateY(-50%) translateX(25%) rotate(5deg)',
+          },
+        },
       },
     },
   },

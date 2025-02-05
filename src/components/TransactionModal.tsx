@@ -143,18 +143,42 @@ export default function TransactionModal({
             <label className="block text-sm font-medium text-frost-blue mb-1">
               From Account
             </label>
-            <select
-              value={formData.accountId}
-              onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
-              className="w-full px-4 py-2 bg-white/10 border border-frost-blue/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-green text-snow-white"
-              required
-            >
-              {sortedAccounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.accountName} (${account.balance.toFixed(2)})
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={formData.accountId}
+                onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                className="appearance-none w-full glass-card bg-white/5 border border-frost-blue/20 rounded-lg 
+                          px-4 py-2 pr-10 text-snow-white focus:outline-none focus:ring-2 
+                          focus:ring-aurora-green hover:bg-white/10 transition-colors"
+                required
+              >
+                {sortedAccounts.map((account) => (
+                  <option 
+                    key={account.id} 
+                    value={account.id}
+                    className="bg-nordic-blue text-snow-white"
+                  >
+                    {account.accountName} (${account.balance.toFixed(2)})
+                  </option>
+                ))}
+              </select>
+              {/* Custom dropdown arrow */}
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg 
+                  className="w-4 h-4 text-frost-blue" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {type === 'transfer' && (
@@ -162,21 +186,45 @@ export default function TransactionModal({
               <label className="block text-sm font-medium text-frost-blue mb-1">
                 To Account
               </label>
-              <select
-                value={formData.toAccountId}
-                onChange={(e) => setFormData({ ...formData, toAccountId: e.target.value })}
-                className="w-full px-4 py-2 bg-white/10 border border-frost-blue/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-green text-snow-white"
-                required
-              >
-                <option value="">Select account</option>
-                {sortedAccounts
-                  .filter(acc => acc.id.toString() !== formData.accountId)
-                  .map((account) => (
-                    <option key={account.id} value={account.id}>
-                      {account.accountName} (${account.balance.toFixed(2)})
-                    </option>
-                  ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={formData.toAccountId}
+                  onChange={(e) => setFormData({ ...formData, toAccountId: e.target.value })}
+                  className="appearance-none w-full glass-card bg-white/5 border border-frost-blue/20 rounded-lg 
+                            px-4 py-2 pr-10 text-snow-white focus:outline-none focus:ring-2 
+                            focus:ring-aurora-green hover:bg-white/10 transition-colors"
+                  required
+                >
+                  <option value="" className="bg-nordic-blue text-snow-white">Select account</option>
+                  {sortedAccounts
+                    .filter(acc => acc.id.toString() !== formData.accountId)
+                    .map((account) => (
+                      <option 
+                        key={account.id} 
+                        value={account.id}
+                        className="bg-nordic-blue text-snow-white"
+                      >
+                        {account.accountName} (${account.balance.toFixed(2)})
+                      </option>
+                    ))}
+                </select>
+                {/* Custom dropdown arrow */}
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <svg 
+                    className="w-4 h-4 text-frost-blue" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
           )}
 
