@@ -85,6 +85,24 @@ npx prisma db seed
 npm run dev
 ```
 
+## 🚀 Deployment on Vercel
+
+1. Connect your repository to Vercel
+2. Add your environment variables in Vercel dashboard:
+   ```env
+   DATABASE_URL="your-neon-db-url"
+   DIRECT_URL="your-neon-direct-url"
+   JWT_SECRET="your-secret"
+   JWT_EXPIRES_IN="7d"
+   ```
+3. Add build command override (optional, if needed):
+   ```bash
+   prisma generate && next build
+   ```
+4. Deploy!
+
+> **Note**: Prisma Client needs to be generated during build time on Vercel. The build command in package.json already includes `prisma generate` to handle this automatically.
+
 ## 📊 Database Schema
 
 ```prisma
