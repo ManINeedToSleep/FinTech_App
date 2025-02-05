@@ -9,9 +9,12 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
 
-    // Find user
+    // Find user with their account
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      include: {
+        accounts: true
+      }
     });
 
     if (!user) {
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    // Remove password from response
+    // Remove sensitive data from response
     const { passwordHash, ...userWithoutPassword } = user;
 
     return NextResponse.json({

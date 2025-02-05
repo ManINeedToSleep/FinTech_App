@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     
-    if (!body.amount || !body.accountId || !body.description) {
+    if (!body.amount || !body.accountId || !body.toAccountId || !body.description) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -21,7 +21,8 @@ export async function POST(request: Request) {
     }
 
     const amount = Number(body.amount);
-    const accountId = Number(body.accountId);
+    const fromAccountId = Number(body.accountId);
+    const toAccountId = Number(body.toAccountId);
 
     if (isNaN(amount) || amount <= 0) {
       return NextResponse.json(
@@ -30,68 +31,105 @@ export async function POST(request: Request) {
       );
     }
 
-    if (isNaN(accountId)) {
+    if (isNaN(fromAccountId) || isNaN(toAccountId)) {
       return NextResponse.json(
         { error: 'Invalid account ID' },
         { status: 400 }
       );
     }
 
-    // Check if account exists and belongs to user
-    const account = await prisma.account.findFirst({
-      where: {
-        id: accountId,
-        userId: user.id
-      }
-    });
-
-    if (!account) {
+    if (fromAccountId === toAccountId) {
       return NextResponse.json(
-        { error: 'Account not found' },
+        { error: 'Cannot transfer to the same account' },
+        { status: 400 }
+      );
+    }
+
+    // Check if both accounts exist and belong to user
+    const [fromAccount, toAccount] = await Promise.all([
+      prisma.account.findFirst({
+        where: {
+          id: fromAccountId,
+          userId: user.id
+        }
+      }),
+      prisma.account.findFirst({
+        where: {
+          id: toAccountId,
+          userId: user.id
+        }
+      })
+    ]);
+
+    if (!fromAccount || !toAccount) {
+      return NextResponse.json(
+        { error: 'One or both accounts not found' },
         { status: 404 }
       );
     }
 
-    if (account.balance < amount) {
+    if (fromAccount.balance < amount) {
       return NextResponse.json(
         { error: 'Insufficient funds' },
         { status: 400 }
       );
     }
 
-    // Get or create withdrawal category using upsert
-    const withdrawalCategory = await prisma.category.upsert({
+    // Get or create transfer category
+    const transferCategory = await prisma.category.upsert({
       where: {
         name_type: {
-          name: 'Withdrawal',
-          type: 'WITHDRAWAL'
+          name: 'Transfer',
+          type: 'TRANSFER'
         }
       },
       update: {}, // no updates needed
       create: {
-        name: 'Withdrawal',
-        type: 'WITHDRAWAL',
-        icon: '↑'
+        name: 'Transfer',
+        type: 'TRANSFER',
+        icon: '⇄'
       }
     });
 
     try {
       const result = await prisma.$transaction([
+        // Debit from source account
         prisma.transaction.create({
           data: {
-            type: 'WITHDRAWAL',
+            type: 'TRANSFER',
             amount: -amount,
             description: body.description,
             userId: user.id,
-            accountId: accountId,
-            categoryId: withdrawalCategory.id
+            accountId: fromAccountId,
+            categoryId: transferCategory.id
           }
         }),
+        // Credit to destination account
+        prisma.transaction.create({
+          data: {
+            type: 'TRANSFER',
+            amount: amount,
+            description: body.description,
+            userId: user.id,
+            accountId: toAccountId,
+            categoryId: transferCategory.id
+          }
+        }),
+        // Update source account balance
         prisma.account.update({
-          where: { id: accountId },
-          data: { 
+          where: { id: fromAccountId },
+          data: {
             balance: {
               decrement: amount
+            }
+          }
+        }),
+        // Update destination account balance
+        prisma.account.update({
+          where: { id: toAccountId },
+          data: {
+            balance: {
+              increment: amount
             }
           }
         })
@@ -99,7 +137,6 @@ export async function POST(request: Request) {
 
       return NextResponse.json(result[0]);
     } catch (dbError) {
-      // Safe error logging
       const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown database error';
       console.error('Database error:', errorMessage);
       
@@ -109,12 +146,11 @@ export async function POST(request: Request) {
       );
     }
   } catch (error) {
-    // Safe error logging
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Request error:', errorMessage);
     
     return NextResponse.json(
-      { error: 'Failed to process expense' },
+      { error: 'Failed to process transfer' },
       { status: 500 }
     );
   }

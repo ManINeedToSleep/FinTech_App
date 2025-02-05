@@ -1,6 +1,6 @@
 # FinTech App
 
-A modern financial management application built with Next.js, TypeScript, and Prisma. Features include transaction management, financial calculators, and analytics.
+A modern financial management application built with Next.js, TypeScript, and Prisma, deployed on Vercel with Neon PostgreSQL. Features include transaction management, financial calculators, and analytics.
 
 ## Features
 
@@ -16,9 +16,10 @@ A modern financial management application built with Next.js, TypeScript, and Pr
 Before you begin, ensure you have installed:
 - Node.js (v18 or higher)
 - npm or yarn
-- PostgreSQL
+- Neon account (for PostgreSQL database)
+- Vercel account (for deployment)
 
-## Installation
+## Setup
 
 1. Clone the repository:
 ```bash
@@ -29,20 +30,28 @@ cd fintech-app
 2. Install dependencies:
 ```bash
 npm install
-``` 
-
-3. Set up your environment variables by creating a `.env` file in the root directory:
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/fintech_db"
-JWT_SECRET="your-secret-key"
-JWT_EXPIRES_IN="24h"
 ```
 
-4. Set up the database:
+3. Set up your environment variables:
+Create a `.env` file:
+```env
+# Database (Neon)
+DATABASE_URL="postgres://user:password@endpoint/database"
+DIRECT_URL="postgres://user:password@endpoint/database"
+
+# Authentication
+JWT_SECRET="your-secret-key"
+JWT_EXPIRES_IN="24h"
+
+# Vercel
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+4. Setup database:
 ```bash
 npx prisma generate
 npx prisma db push
-``` 
+```
 
 ## Development
 
@@ -52,6 +61,13 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Deployment
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
 
 ## Database Schema
 

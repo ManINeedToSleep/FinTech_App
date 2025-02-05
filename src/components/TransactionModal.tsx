@@ -1,10 +1,23 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
+import { Account } from '@/types/schema';
+
+export interface TransactionData {
+  amount: number;
+  description: string;
+  accountId: string;
+  toAccountId?: string;
+  categoryId?: string;
+}
+
 interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'deposit' | 'withdraw' | 'expense';
-  onSubmit: (amount: number, description: string) => Promise<void>;
+  type: 'deposit' | 'withdraw' | 'transfer' | 'expense';
+  accounts: Account[];
+  onSubmit: (data: TransactionData) => Promise<void>;
+  selectedAccountId?: string;
 }
 
 /**
@@ -18,79 +31,195 @@ interface TransactionModalProps {
  * Props:
  * @param isOpen - Controls modal visibility
  * @param onClose - Function to close modal
- * @param type - Transaction type ('deposit' | 'withdraw' | 'expense')
+ * @param type - Transaction type ('deposit' | 'withdraw' | 'expense' | 'transfer')
+ * @param accounts - List of accounts available for transactions
  * @param onSubmit - Handler for form submission
+ * @param selectedAccountId - Optional selected account ID
  */
-export default function TransactionModal({ isOpen, onClose, type, onSubmit }: TransactionModalProps) {
+export default function TransactionModal({
+  isOpen,
+  onClose,
+  type,
+  accounts,
+  onSubmit,
+  selectedAccountId
+}: TransactionModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    amount: '',
+    description: '',
+    accountId: '',
+    toAccountId: '',
+    categoryId: ''
+  });
+
+  // Sort accounts in the modal as well
+  const sortedAccounts = useMemo(() => {
+    const accountTypeOrder: Record<string, number> = {
+      CHECKING: 0,
+      SAVINGS: 1,
+      INVESTMENT: 2
+    };
+
+    return [...accounts].sort((a, b) => {
+      // Default to end of list if type not found
+      const orderA = accountTypeOrder[a.accountType] ?? 999;
+      const orderB = accountTypeOrder[b.accountType] ?? 999;
+      return orderA - orderB;
+    });
+  }, [accounts]);
+
+  useEffect(() => {
+    if (isOpen && sortedAccounts.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        accountId: selectedAccountId || sortedAccounts[0].id.toString()
+      }));
+    }
+  }, [isOpen, sortedAccounts, selectedAccountId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const amount = parseFloat(formData.amount);
+      if (isNaN(amount) || amount <= 0) {
+        throw new Error('Please enter a valid positive amount');
+      }
+
+      if (!formData.description.trim()) {
+        throw new Error('Please enter a description');
+      }
+
+      if (!formData.accountId) {
+        throw new Error('Please select an account');
+      }
+
+      // Format data based on transaction type
+      const transactionData: TransactionData = {
+        amount,
+        description: formData.description.trim(),
+        accountId: formData.accountId,
+      };
+
+      // Add toAccountId for transfers
+      if (type === 'transfer') {
+        if (!formData.toAccountId) {
+          throw new Error('Please select a destination account');
+        }
+        transactionData.toAccountId = formData.toAccountId;
+      }
+
+      await onSubmit(transactionData);
+      onClose();
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Transaction failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
-  const titles = {
-    deposit: 'Deposit Money',
-    withdraw: 'Withdraw Money',
-    expense: 'Add Expense'
-  };
-
-  const buttonColors = {
-    deposit: 'bg-green-600 hover:bg-green-700',
-    withdraw: 'bg-blue-600 hover:bg-blue-700',
-    expense: 'bg-red-600 hover:bg-red-700'
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const amount = parseFloat(form.amount.value);
-    const description = form.description.value;
-    await onSubmit(amount, description);
-    onClose();
-    form.reset();
-  };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">
-          {titles[type]}
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="glass-card w-full max-w-md p-6 rounded-xl">
+        <h2 className="text-2xl font-bold text-snow-white mb-4 capitalize">
+          {type} {type === 'expense' ? 'Payment' : ''}
         </h2>
+
+        {error && (
+          <div className="bg-red-500/10 text-red-500 p-3 rounded-lg text-sm mb-4">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-              Amount ($)
+            <label className="block text-sm font-medium text-frost-blue mb-1">
+              From Account
+            </label>
+            <select
+              value={formData.accountId}
+              onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+              className="w-full px-4 py-2 bg-white/10 border border-frost-blue/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-green text-snow-white"
+              required
+            >
+              {sortedAccounts.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.accountName} (${account.balance.toFixed(2)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {type === 'transfer' && (
+            <div>
+              <label className="block text-sm font-medium text-frost-blue mb-1">
+                To Account
+              </label>
+              <select
+                value={formData.toAccountId}
+                onChange={(e) => setFormData({ ...formData, toAccountId: e.target.value })}
+                className="w-full px-4 py-2 bg-white/10 border border-frost-blue/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-green text-snow-white"
+                required
+              >
+                <option value="">Select account</option>
+                {sortedAccounts
+                  .filter(acc => acc.id.toString() !== formData.accountId)
+                  .map((account) => (
+                    <option key={account.id} value={account.id}>
+                      {account.accountName} (${account.balance.toFixed(2)})
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-frost-blue mb-1">
+              Amount
             </label>
             <input
               type="number"
-              id="amount"
-              name="amount"
-              step="0.01"
               min="0.01"
+              step="0.01"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              className="w-full px-4 py-2 bg-white/10 border border-frost-blue/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-green text-snow-white"
             />
           </div>
+
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-frost-blue mb-1">
               Description
             </label>
             <input
               type="text"
-              id="description"
-              name="description"
               required
-              placeholder={`Enter ${type} description`}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2 bg-white/10 border border-frost-blue/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-green text-snow-white"
             />
           </div>
-          <div className="flex space-x-3">
+
+          <div className="flex space-x-3 pt-4">
             <button
               type="submit"
-              className={`flex-1 py-2 px-4 rounded-md text-white ${buttonColors[type]}`}
+              disabled={loading}
+              className="flex-1 py-2 px-4 bg-aurora-green text-nordic-blue rounded-lg font-medium hover:bg-aurora-green/90 transition-colors disabled:opacity-50"
             >
-              Confirm
+              {loading ? 'Processing...' : 'Confirm'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="flex-1 py-2 px-4 border border-frost-blue text-frost-blue rounded-lg hover:bg-frost-blue/10 transition-colors"
             >
               Cancel
             </button>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { getUserFromToken } from '../../../lib/auth';
+import { getUserFromToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -30,6 +30,10 @@ export async function GET(request: Request) {
 
     const transactions = await prisma.transaction.findMany({
       where: { userId: user.id },
+      include: {
+        category: true,
+        account: true
+      },
       orderBy: { createdAt: 'desc' },
       take: 10, // Get last 10 transactions
     });
@@ -37,6 +41,9 @@ export async function GET(request: Request) {
     return NextResponse.json(transactions);
   } catch (error) {
     console.error('Failed to fetch transactions:', error);
-    return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch transactions' }, 
+      { status: 500 }
+    );
   }
 } 
