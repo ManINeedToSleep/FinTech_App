@@ -80,7 +80,7 @@ export default function About() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-snow-white mb-4">
-            Welcome to Nordic Finance
+            Welcome to Fintech Financial Bank
           </h1>
           <p className="text-xl text-frost-blue max-w-2xl mx-auto">
             Experience the future of banking with our modern financial platform
